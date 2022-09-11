@@ -1,4 +1,4 @@
-import pygame,sys
+import pygame,sys,re
 from math import *
 
 window = pygame.display.set_mode((800, 600))
@@ -6,7 +6,7 @@ clock = pygame.time.Clock()
 
 projection_matrix = [[1,0,0],[0,1,0],[0,0,0]]
 
-cube_points = [n for n in range(8)];cube_points[0] = [[-1], [-1], [1]];cube_points[1] = [[1],[-1],[1]];cube_points[2] = [[1],[1],[1]];cube_points[3] = [[-1],[1],[1]];cube_points[4] = [[-1],[-1],[-1]];cube_points[5] = [[1],[-1],[-1]];cube_points[6] = [[1],[1],[-1]];cube_points[7] = [[-1],[1],[-1]]
+#cube_points = [n for n in range(8)];cube_points[0] = [[-1], [-1], [1]];cube_points[1] = [[1],[-1],[1]];cube_points[2] = [[1],[1],[1]];cube_points[3] = [[-1],[1],[1]];cube_points[4] = [[-1],[-1],[-1]];cube_points[5] = [[1],[-1],[-1]];cube_points[6] = [[1],[1],[-1]];cube_points[7] = [[-1],[1],[-1]]
 
 scale = 100
 
@@ -57,6 +57,33 @@ class Button():
 
 		return action
         
+class ImportOBJ:
+    def __init__(self, filename):
+        self.filename = filename
+    def importobj(self):
+        reComp = re.compile("(?<=^)(v |vn |vt |f )(.*)(?=$)", re.MULTILINE)
+        with open(self.filename) as f:
+            data = [txt.group() for txt in reComp.finditer(f.read())]
+        v_arr, vn_arr, f_arr = [], [], []
+        for line in data:
+            tokens = line.split(' ')
+            if tokens[0] == 'v':
+                v_arr.append([float(c) for c in tokens[1:]])
+            elif tokens[0] == 'vn':
+                vn_arr.append([float(c) for c in tokens[1:]])
+            elif tokens[0] == 'vt':
+                vn_arr.append([float(c) for c in tokens[1:]])
+            elif tokens[0] == 'f':
+                f_arr.append([[int(i) if len(i) else 0 for i in c.split('/')] for c in tokens[1:]])
+        vertices = []
+        for face in f_arr:
+            for tp in face:
+                for i in v_arr[tp[0]-1]:
+                    vertices.append([i])
+        return list(zip(*[iter(vertices)]*3))
+
+cube_points = ImportOBJ("C:\\Users\\pengu\\Downloads\\sphere.obj").importobj()
+
 fast_button = Button(120, 515, pygame.image.load("fast.png"), 4)
 slow_button = Button(550, 515, pygame.image.load("slow.png"), 4)
 
@@ -93,8 +120,8 @@ while True:
         rotate_speed -= 0.5
 
     angle_x += rotate_speed
-    #angle_y += rotate_speed
-    #angle_z += rotate_speed
+    angle_y += rotate_speed
+    angle_z += rotate_speed
 
     rotation_x = [[1, 0, 0],[0, cos(angle_x/60), -sin(angle_x/60)],[0, sin(angle_x/60), cos(angle_x/60)]]
 
@@ -118,19 +145,6 @@ while True:
         i+=1
 
         pygame.draw.circle(window, (255, 0, 0), (x,y), 5)
-
-    connect_points(0, 1, points)
-    connect_points(0, 3, points)
-    connect_points(0, 4, points)
-    connect_points(1, 2, points)
-    connect_points(1, 5, points)
-    connect_points(2, 6, points)
-    connect_points(2, 3, points)
-    connect_points(3, 7, points)
-    connect_points(4, 5, points)
-    connect_points(4, 7, points)
-    connect_points(6, 5, points)
-    connect_points(6, 7, points)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
