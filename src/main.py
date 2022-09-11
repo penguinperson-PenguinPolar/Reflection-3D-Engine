@@ -82,7 +82,7 @@ class ImportOBJ:
                     vertices.append([i])
         return list(zip(*[iter(vertices)]*3))
 
-cube_points = ImportOBJ("C:\\Users\\pengu\\Downloads\\sphere.obj").importobj()
+cube_points = ImportOBJ("sphere.obj").importobj()
 
 fast_button = Button(120, 515, pygame.image.load("fast.png"), 4)
 slow_button = Button(550, 515, pygame.image.load("slow.png"), 4)
